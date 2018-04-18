@@ -1,0 +1,16 @@
+<input type="text"
+       autocomplete="off"
+       autocorrect="off"
+       autocapitalize="off"
+       spellcheck="false"
+       class="ember-power-select-search-input"
+       value={{select.searchText}}
+       aria-controls={{listboxId}}
+       placeholder={{searchPlaceholder}}
+       oninput={{onInput}}
+       onfocus={{onFocus}}
+       onblur={{onBlur}}
+       onkeydown={{action "onKeydown"}}
+       onkeyup={{action "onKeyup"}}
+  >
+{{yield}}
