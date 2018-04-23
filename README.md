@@ -1,4 +1,4 @@
-# ember-intl-phone-input
+#  Do NOT use: currency under testing and development
 
 This README outlines the details of collaborating on this Ember addon.
 

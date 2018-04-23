@@ -72,14 +72,15 @@ export default Component.extend({
 
   init() {
     this._super(...arguments);
-    let value = this.get('value');
-    let countries = this.get('countries');
-    let keepUserFormat = this.get('keepUserFormat');
-    let country = String(this.get('country')).toUpperCase();
+    let { value, countries, keepUserFormat, country } =
+      this.getProperties('value', 'countries', 'keepUserFormat', 'country');
+
+    country = String(country).toUpperCase();
+
     let { countryOptions, metaLocalCodes } = this.createCountryAndMetaLocalOptions(countries, METADATA_COUNTRIES, LOCAL_CODES);
     this.setProperties({ countryOptions, metaLocalCodes });
 
-    let selected = countryOptions.find(c => c.country === country);
+    let selected = this.findOptionByIsoCode(country);
     assert(`${this.toString()}: "country" option should be from the list: ${countryOptions.mapBy('country')}`, !!selected);
 
     if (!keepUserFormat && value) {
@@ -139,11 +140,14 @@ export default Component.extend({
   },
 
   forceFormat(value, selectedCountry) {
-    let formatted = value;
-    let parsed = parseNumber(formatted, selectedCountry);
+    let formatted;
+    let format = this.get('format');
+    let parsed = parseNumber(value, selectedCountry);
 
     if (parsed.phone) {
-      formatted = formatNumber(parsed, this.get('format'))
+      formatted = formatNumber(parsed, format)
+    } else {
+      formatted = formatNumber({ phone: value, country: selectedCountry }, format)
     }
     return formatted;
   },
@@ -187,10 +191,12 @@ export default Component.extend({
 
       if (value) {
         // swap calling codes on input
-        value = value.replace(previousCallingCode, selected.callingCode);
+        value = this.forceFormat(value.replace(previousCallingCode, selected.callingCode), selected);
+      } else {
+        value = `+${selected.callingCode} `
       }
 
-      this.set('probCountries', null);
+      this.set('guessedCountries', null);
       this.set('value', value);
       this.set('selected', selected);
 

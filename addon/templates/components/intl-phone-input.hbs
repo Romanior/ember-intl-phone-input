@@ -16,14 +16,18 @@
     searchEnabled=searchEnabled
     matcher=matcher
   as |country|}}
-    <span class="flag-icon--{{country.countryLowerCase}}"></span>
-    <strong>{{country.name}}</strong>
-    <span>+ {{country.callingCode}}</span>
-    <i>{{country.country}}</i>
+
+    {{intl-phone-input/select-option
+      class="ember-intl-phone-input__select-option"
+      country=(readonly country)
+    }}
+
   {{/power-select}}
 
 {{else}}
-
+  <div class="ember-intl-phone-input__trigger">
+    <span class="ember-intl-phone-input__icon-flag icon-flag--{{country.countryLowerCase}}"></span>
+  </div>
 {{/if}}
 
 {{component
