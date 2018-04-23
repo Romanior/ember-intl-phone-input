@@ -1,6 +1,6 @@
 {
   "name": "ember-intl-phone-input",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Ember.js international phone input",
   "keywords": [
     "ember-addon",
@@ -20,7 +20,12 @@
     "doc": "doc",
     "test": "tests"
   },
-  "repository": "",
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Romanior/ember-intl-phone-input.git"
+  },
+
   "scripts": {
     "build": "ember build",
     "start": "ember server",

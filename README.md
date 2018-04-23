@@ -1,10 +1,15 @@
-#  Do NOT use: currency under testing and development
+#  (WIP) Ember International Phone Input
 
-This README outlines the details of collaborating on this Ember addon.
+Leverage `libphonenumber-js` for displaying, formatting and parsing international phone input.
 
 ## Installation
 
-* `git clone <repository-url>` this repository
+`ember install ember-intl-phone-input`
+
+
+## Development
+
+* `git clone git@github.com:Romanior/ember-intl-phone-input.git` this repository
 * `cd ember-intl-phone-input`
 * `npm install`
 
