@@ -7,6 +7,9 @@ Leverage `libphonenumber-js` for displaying, formatting and parsing internationa
 `ember install ember-intl-phone-input`
 
 
+ ![in action](https://cl.ly/0C1C3Y292f31/Screen%20Recording%202018-04-23%20at%2006.57%20PM.gif)
+
+
 ## Development
 
 * `git clone git@github.com:Romanior/ember-intl-phone-input.git` this repository
