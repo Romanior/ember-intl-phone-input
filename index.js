@@ -2,7 +2,7 @@
 'use strict';
 
 module.exports = {
-  name: 'intl-phone-input',
+  name: 'ember-intl-phone-input',
   // addon index.js
   isDevelopingAddon() {
     return true;

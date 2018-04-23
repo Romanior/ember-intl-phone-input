@@ -1,16 +1,41 @@
-<input type="text"
-       autocomplete="off"
-       autocorrect="off"
-       autocapitalize="off"
-       spellcheck="false"
-       class="ember-power-select-search-input"
-       value={{select.searchText}}
-       aria-controls={{listboxId}}
-       placeholder={{searchPlaceholder}}
-       oninput={{onInput}}
-       onfocus={{onFocus}}
-       onblur={{onBlur}}
-       onkeydown={{action "onKeydown"}}
-       onkeyup={{action "onKeyup"}}
-  >
+{{#if hasDropDown}}
+  {{#power-select
+    triggerComponent=(
+      component 'intl-phone-input/flag-trigger'
+      hideIcon=hideIcon
+      icon=icon
+    )
+    options=countryOptions
+    tagName="div"
+    class="ember-intl-phone-input__select"
+    concatenatedTriggerClasses="ember-intl-phone-input__trigger"
+    selected=selected
+    disabled=disabled
+    onchange=(action "countryChanged")
+    matchTriggerWidth=false
+    searchEnabled=searchEnabled
+    matcher=matcher
+  as |country|}}
+    <span class="flag-icon--{{country.countryLowerCase}}"></span>
+    <strong>{{country.name}}</strong>
+    <span>+ {{country.callingCode}}</span>
+    <i>{{country.country}}</i>
+  {{/power-select}}
+
+{{else}}
+
+{{/if}}
+
+{{component
+  inputComponent
+  autocomplete=(readonly autocomplete)
+  inputClassName=(readonly inputClassName)
+  disabled=(readonly disabled)
+  placeholder=(readonly placeholder)
+  type=(readonly inputType)
+  value=(readonly value)
+  valueChanged=(action "valueChanged")
+  keyUpInput=(action "keyUpInput")
+}}
+
 {{yield}}

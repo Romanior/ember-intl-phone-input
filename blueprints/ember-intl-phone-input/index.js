@@ -4,9 +4,9 @@ module.exports = {
   normalizeEntityName: function() {},
 
   afterInstall: function() {
-    return RSVP.all([
-      this.addPackageToProject('libphonenumber-js'),
-      this.addAddonToProject('ember-browserify'),
-    ]);
+    // return RSVP.all([
+    //   this.addPackageToProject('libphonenumber-js'),
+    //   this.addAddonToProject('ember-browserify'),
+    // ]);
   }
 };

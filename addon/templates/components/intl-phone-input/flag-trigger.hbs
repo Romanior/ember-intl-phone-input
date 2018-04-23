@@ -1,0 +1,7 @@
+{{#if select.selected}}
+  {{#if selectedItemComponent}}
+    {{component selectedItemComponent option=(readonly select.selected) select=(readonly select)}}
+  {{else}}
+     <span class="ember-intl-phone-input__icon-flag icon-flag--{{select.selected.countryLowerCase}}"></span>
+  {{/if}}
+{{/if}}

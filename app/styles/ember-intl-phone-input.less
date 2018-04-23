@@ -1,0 +1,69 @@
+@import 'ember-intl-phone-input/variables';
+@import 'ember-intl-phone-input/icons';
+
+.ember-intl-phone-input__input {
+  display: flex;
+  width: 100%;
+  padding: .375rem .75rem .375em 60px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  box-sizing: border-box;
+  &:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  }
+  &::-webkit-input-placeholder {
+    color: #c3c3c3;
+  }
+  &::-moz-placeholder {
+    color: #c3c3c3;
+  }
+  &:-ms-input-placeholder {
+    color: #c3c3c3;
+  }
+  &:-moz-placeholder {
+    color: #c3c3c3;
+  }
+}
+
+.ember-intl-phone-input{
+  position: relative;
+}
+
+.ember-intl-phone-input__select {
+  position: absolute;
+  z-index: 1;
+}
+
+.ember-intl-phone-input__trigger {
+  padding: 12px;
+}
+
+.ember-intl-phone-input__icon-flag {
+  display: block;
+  height: 14px;
+  width: 20px;
+  background-size: cover;
+  position: relative;
+
+  &:after {
+    content: ' ';
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #adadad;
+    position: absolute;
+    right: -16px;
+    top: 6px;
+  }
+}
