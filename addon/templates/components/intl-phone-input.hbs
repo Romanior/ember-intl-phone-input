@@ -2,8 +2,6 @@
   {{#power-select
     triggerComponent=(
       component 'intl-phone-input/flag-trigger'
-      hideIcon=hideIcon
-      icon=icon
     )
     options=countryOptions
     tagName="div"
@@ -15,7 +13,8 @@
     matchTriggerWidth=false
     searchEnabled=searchEnabled
     matcher=matcher
-  as |country|}}
+  as |country|
+  }}
 
     {{intl-phone-input/select-option
       class="ember-intl-phone-input__select-option"
@@ -23,23 +22,22 @@
     }}
 
   {{/power-select}}
-
-{{else}}
-  <div class="ember-intl-phone-input__trigger">
-    <span class="ember-intl-phone-input__icon-flag icon-flag--{{country.countryLowerCase}}"></span>
-  </div>
 {{/if}}
 
-{{component
-  inputComponent
-  autocomplete=(readonly autocomplete)
-  inputClassName=(readonly inputClassName)
-  disabled=(readonly disabled)
-  placeholder=(readonly placeholder)
-  type=(readonly inputType)
-  value=(readonly value)
-  valueChanged=(action "valueChanged")
-  keyUpInput=(action "keyUpInput")
-}}
-
-{{yield}}
+{{#if hasBlock}}
+  {{yield context}}
+{{else}}
+  {{input
+    class=inputClassName
+    type=type
+    disabled=disabled
+    autocomplete=autocomplete
+    autocorrect="off"
+    autocapitalize="off"
+    spellcheck="false"
+    value=value
+    placeholder=placeholder
+    change=(action "valueChanged" value)
+    keyUp=(action "keyUpInput" value)
+  }}
+{{/if}}

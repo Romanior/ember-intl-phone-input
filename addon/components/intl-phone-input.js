@@ -1,7 +1,5 @@
 import Component from '@ember/component';
-import { get, set, computed } from '@ember/object';
-import { or, reads } from '@ember/object/computed';
-import { assert } from '@ember/debug';
+import { get, computed } from '@ember/object';
 import libphonenumber from 'npm:libphonenumber-js';
 import metadata from 'npm:libphonenumber-js/metadata.full.json';
 import examples from 'npm:libphonenumber-js/examples.mobile.json';
@@ -15,25 +13,23 @@ import performSearchCountry from '../utils/perform-search-country';
 
 const { countries: METADATA_COUNTRIES, country_calling_codes: CALLING_CODES } = metadata;
 const { parseNumber, formatNumber, AsYouType } = libphonenumber;
-const { keys, values, assign } = Object;
+const { keys, assign } = Object;
 
 export default Component.extend({
   autocomplete: 'off',
   inputClassName: 'ember-intl-phone-input__input',
   classNames: ['ember-intl-phone-input'],
   hasDropDown: true,
-  showExampleAsPlaceholder: true,
   country: 'RU',
   countries,
   layout,
+  showExampleAsPlaceholder: true,
 
   format: FORMATS.INTERNATIONAL,
   shouldFormatAsYouType: true,
   shouldFormatOnChange: true,
   keepUserFormat: false,
-  value: reads('phone'),
 
-  selected: {},
   disabled: false,
   readonly: false,
   inputType: 'text',
@@ -46,22 +42,33 @@ export default Component.extend({
   keyUpInput() {},
   valueChanged() {},
 
-  formatType: computed('format', {
+  value: computed('phone', 'selected.country', {
     get() {
-      let format = this.get('format');
-      if (values(FORMATS).includes(format)) {
-        return format;
+      let selectedCountry = this.get('selected.country');
+      let phone = this.get('phone');
+      let keepUserFormat = this.get('keepUserFormat');
+      if (!keepUserFormat) {
+        phone = this.forceFormat(phone, selectedCountry);
       }
+      return phone;
+    },
+    set(k, v) {
+      return v
     }
-  }).readOnly(),
+  }),
 
-  placeholder: computed('country', 'formatType', 'showExampleAsPlaceholder', 'selected.country', function() {
-    let { showExampleAsPlaceholder, country, formatType, selected } =
-      this.getProperties('showExampleAsPlaceholder', 'country', 'formatType', 'selected');
+  selected: computed('country', function() {
+    let country = String(this.get('country')).toUpperCase();
+    return  this.findOptionByIsoCode(country);
+  }),
+
+  placeholder: computed('country', 'format', 'showExampleAsPlaceholder', 'selected.country', function() {
+    let { showExampleAsPlaceholder, country, format, selected } =
+      this.getProperties('showExampleAsPlaceholder', 'country', 'format', 'selected');
 
     if (showExampleAsPlaceholder) {
-      let country = get(selected, 'country') || country;
-      return formatNumber({ country: country, phone: examples[country] }, formatType)
+      country = get(selected, 'country') || country;
+      return formatNumber({ country, phone: examples[country] }, format)
     }
   }),
 
@@ -72,22 +79,7 @@ export default Component.extend({
 
   init() {
     this._super(...arguments);
-    let { value, countries, keepUserFormat, country } =
-      this.getProperties('value', 'countries', 'keepUserFormat', 'country');
-
-    country = String(country).toUpperCase();
-
-    let { countryOptions, metaLocalCodes } = this.createCountryAndMetaLocalOptions(countries, METADATA_COUNTRIES, LOCAL_CODES);
-    this.setProperties({ countryOptions, metaLocalCodes });
-
-    let selected = this.findOptionByIsoCode(country);
-    assert(`${this.toString()}: "country" option should be from the list: ${countryOptions.mapBy('country')}`, !!selected);
-
-    if (!keepUserFormat && value) {
-      this.set('value', this.forceFormat(value, selected.country))
-    }
-
-    this.set('selected', selected);
+    this.setProperties(this.createCountryAndMetaLocalOptions(this.get('countries'), METADATA_COUNTRIES, LOCAL_CODES));
   },
 
   createCountryAndMetaLocalOptions(countries, metadata, localCodes) {
@@ -125,7 +117,6 @@ export default Component.extend({
     option = String(get(option, 'name')).toLowerCase();
     term = String(term).toLowerCase();
 
-    console.log(term, option);
     return option.startsWith(term) ? 1 : -1;
   },
 
@@ -140,30 +131,32 @@ export default Component.extend({
   },
 
   forceFormat(value, selectedCountry) {
-    let formatted;
-    let format = this.get('format');
-    let parsed = parseNumber(value, selectedCountry);
+    if (value) {
+      let formatted;
+      let format = this.get('format');
+      let parsed = parseNumber(value, selectedCountry);
 
-    if (parsed.phone) {
-      formatted = formatNumber(parsed, format)
-    } else {
-      formatted = formatNumber({ phone: value, country: selectedCountry }, format)
+      if (parsed.phone) {
+        formatted = formatNumber(parsed, format)
+      } else {
+        formatted = formatNumber({ phone: value, country: selectedCountry }, format)
+      }
+      return formatted;
     }
-    return formatted;
   },
 
   prepareForOutput(value, selected) {
-    if (value) {
-      // try to parse value as correct number
-      let parsed = parseNumber(value, selected.country);
+    // try to parse value as correct number
+    formatNumber;
 
-      // if it does not work, just stripped out +, \s and -
-      if (!parsed.phone) {
-        parsed.phone = rawValue(value).replace(selected.callingCode, '');
-      }
+    let parsed = parseNumber(value, selected.country);
 
-      return assign({}, parsed, selected);
+    // if it does not work, just stripped out +, \s and -
+    if (!parsed.phone) {
+      parsed.phone = rawValue(value).replace(selected.callingCode, '');
     }
+
+    return assign({ number: formatNumber(parsed.phone, selected.country, FORMATS.E164) }, parsed, selected);
   },
 
   searchCountryBasedOnValue(value, selectedCountry) {
@@ -181,7 +174,10 @@ export default Component.extend({
   },
 
   findOptionByIsoCode(country) {
-    return this.get('countryOptions').find(c => c.country === country);
+    let countryOptions = this.get('countryOptions');
+    if (countryOptions) {
+      return countryOptions.find(c => c.country === country);
+    }
   },
 
   actions: {
