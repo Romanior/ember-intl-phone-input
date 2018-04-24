@@ -1,6 +1,26 @@
-<h2 id="title">Ember International Phone Input</h2>
+<h2 id="title">International Phone Input</h2>
 
 
 {{intl-phone-input
-
+  valueChanged=(action (mut phone))
+  keyUpInput=(action (mut phoneKeyUp))
 }}
+
+
+<div style="margin-top: 50px"></div>
+<h5>On Change</h5>
+<p>E.164 Number: {{phone.number}}</p>
+<p>Country iso: {{phone.country}}</p>
+<p>Country calling code: {{phone.callingCode}}</p>
+<p>Country name: {{phone.name}}</p>
+<p>Local phone: {{phone.phone}}</p>
+<p>Number probably valid: {{phone.probablyValidNumber}}</p>
+
+<div style="margin-top: 20px"></div>
+<h5>On Key Up</h5>
+<p>E.164 Number: {{phoneKeyUp.number}}</p>
+<p>Country iso: {{phoneKeyUp.country}}</p>
+<p>Country calling code: {{phoneKeyUp.country}}</p>
+<p>Country name: {{phoneKeyUp.name}}</p>
+<p>Local phone: {{phoneKeyUp.phone}}</p>
+<p>Number probably valid: {{phoneKeyUp.probablyValidNumber}}</p>

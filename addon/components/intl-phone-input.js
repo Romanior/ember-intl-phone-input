@@ -12,7 +12,7 @@ import rawValue from '../utils/raw-value';
 import performSearchCountry from '../utils/perform-search-country';
 
 const { countries: METADATA_COUNTRIES, country_calling_codes: CALLING_CODES } = metadata;
-const { parseNumber, formatNumber, AsYouType } = libphonenumber;
+const { parseNumber, formatNumber, AsYouType, isValidNumber } = libphonenumber;
 const { keys, assign } = Object;
 
 export default Component.extend({
@@ -42,7 +42,7 @@ export default Component.extend({
   keyUpInput() {},
   valueChanged() {},
 
-  value: computed('phone', 'selected.country', {
+  value: computed('phone', {
     get() {
       let selectedCountry = this.get('selected.country');
       let phone = this.get('phone');
@@ -57,9 +57,17 @@ export default Component.extend({
     }
   }),
 
-  selected: computed('country', function() {
-    let country = String(this.get('country')).toUpperCase();
-    return  this.findOptionByIsoCode(country);
+  selected: computed('country', {
+    get() {
+      let country = this.get('country');
+      if (country) {
+        country = String(country).toUpperCase();
+        return this.findOptionByIsoCode(country);
+      }
+    },
+    set(k, v) {
+      return v
+    }
   }),
 
   placeholder: computed('country', 'format', 'showExampleAsPlaceholder', 'selected.country', function() {
@@ -154,7 +162,10 @@ export default Component.extend({
       parsed.phone = rawValue(value).replace(selected.callingCode, '');
     }
 
-    return assign({ number: formatNumber(parsed.phone, selected.country, FORMATS.E164) }, parsed, selected);
+    return assign({
+      number: formatNumber(parsed.phone, selected.country, FORMATS.E164),
+      probablyValidNumber: isValidNumber(value, selected.country)
+    }, parsed, selected);
   },
 
   searchCountryBasedOnValue(value, selectedCountry) {
