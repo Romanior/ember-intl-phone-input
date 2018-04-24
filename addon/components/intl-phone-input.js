@@ -147,8 +147,6 @@ export default Component.extend({
 
   prepareForOutput(value, selected) {
     // try to parse value as correct number
-    formatNumber;
-
     let parsed = parseNumber(value, selected.country);
 
     // if it does not work, just stripped out +, \s and -
