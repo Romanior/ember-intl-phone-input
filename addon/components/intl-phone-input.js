@@ -1,8 +1,8 @@
 import Component from '@ember/component';
 import { get, computed } from '@ember/object';
-import libphonenumber from 'npm:libphonenumber-js';
-import metadata from 'npm:libphonenumber-js/metadata.full.json';
-import examples from 'npm:libphonenumber-js/examples.mobile.json';
+import libphonenumber from 'libphonenumber-js';
+import metadata from 'libphonenumber-js/metadata.full.json';
+import examples from 'libphonenumber-js/examples.mobile.json';
 
 import layout from '../templates/components/intl-phone-input';
 import countries from '../utils/countries';
