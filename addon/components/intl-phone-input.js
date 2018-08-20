@@ -20,7 +20,8 @@ export default Component.extend({
   inputClassName: 'ember-intl-phone-input__input',
   classNames: ['ember-intl-phone-input'],
   hasDropDown: true,
-  country: 'RU',
+  phone: '',
+  country: null,
   countries,
   layout,
   showExampleAsPlaceholder: true,
@@ -87,7 +88,18 @@ export default Component.extend({
 
   init() {
     this._super(...arguments);
-    this.setProperties(this.createCountryAndMetaLocalOptions(this.get('countries'), METADATA_COUNTRIES, LOCAL_CODES));
+    let { phone, country } = this.getProperties('phone', 'country');
+
+    if (!country) {
+      ({ country = 'AF', phone = ''} = parseNumber(phone));
+
+
+      this.set('country', country);
+    }
+
+    this.setProperties(
+      this.createCountryAndMetaLocalOptions(this.get('countries'), METADATA_COUNTRIES, LOCAL_CODES
+      ));
   },
 
   createCountryAndMetaLocalOptions(countries, metadata, localCodes) {

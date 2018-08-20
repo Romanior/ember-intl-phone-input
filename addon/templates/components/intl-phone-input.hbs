@@ -25,7 +25,12 @@
 {{/if}}
 
 {{#if hasBlock}}
-  {{yield context}}
+  {{yield (
+      hash
+        value=value
+        country=country
+      )
+  }}
 {{else}}
   {{input
     class=inputClassName
