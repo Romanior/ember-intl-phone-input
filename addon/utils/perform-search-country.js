@@ -1,4 +1,4 @@
-import libphonenumber from 'npm:libphonenumber-js';
+import libphonenumber from 'libphonenumber-js';
 import rawValue from './raw-value';
 
 const { getCountryCallingCode } = libphonenumber;
