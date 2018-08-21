@@ -1,9 +1,7 @@
 import Component from '@ember/component';
-import { get, computed } from '@ember/object';
-import { readOnly, alias } from '@ember/object/computed';
-import { assert } from '@ember/debug';
+import { computed } from '@ember/object';
+import { alias } from '@ember/object/computed';
 import { parseNumber, formatNumber, AsYouType, isValidNumber } from 'libphonenumber-js';
-
 import EXAMPLES from 'libphonenumber-js/examples.mobile.json';
 
 import layout from '../templates/components/intl-phone-input';
