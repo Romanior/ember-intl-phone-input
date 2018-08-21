@@ -7,12 +7,12 @@
     tagName="div"
     class="ember-intl-phone-input__select"
     concatenatedTriggerClasses="ember-intl-phone-input__trigger"
-    selected=selected
+    selected=selectedCountryObj
     disabled=disabled
     onchange=(action "countryChanged")
     matchTriggerWidth=false
     searchEnabled=searchEnabled
-    matcher=matcher
+    searchField="name"
   as |country|
   }}
 
@@ -40,9 +40,11 @@
     autocorrect="off"
     autocapitalize="off"
     spellcheck="false"
-    value=value
+    value=formattedValue
     placeholder=placeholder
-    change=(action "valueChanged" value)
-    keyUp=(action "keyUpInput" value)
+    change=(action "valueChanged" formattedValue)
+    keyUp=(action "keyUpInput" formattedValue)
+    focus-in=(action "onFocusInput")
+    focus-out=(action "onBlurInput")
   }}
 {{/if}}

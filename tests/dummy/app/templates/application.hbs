@@ -2,13 +2,17 @@
 
 
 {{intl-phone-input
+
   valueChanged=(action (mut phone))
   keyUpInput=(action (mut phoneKeyUp))
+  parseOnInit=(action (mut phoneOnInit))
+
+  value=value
 }}
 
 
 <div class="demo-log">
-  {{demo-block title="On Init"  value=phone}}
-  {{demo-block title="On Change" value=phone}}
-  {{demo-block title="On Key Up" value=phone}}
+  {{demo-block title="On Init"  phone=phoneOnInit}}
+  {{demo-block title="On Change" phone=phone}}
+  {{demo-block title="On Key Up" phone=phoneKeyUp}}
 </div>
