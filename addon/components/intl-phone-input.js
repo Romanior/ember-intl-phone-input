@@ -18,8 +18,8 @@ export default Component.extend({
   inputClassName: 'ember-intl-phone-input__input',
   classNames: ['ember-intl-phone-input'],
   hasDropDown: true,
-  phone: '',
-  country: '',
+  phone: null,
+  country: null,
 
   layout,
   showExampleAsPlaceholder: true,
@@ -55,7 +55,7 @@ export default Component.extend({
       let phone = this.get('phone');
       let keepUserFormat = this.get('keepUserFormat');
 
-      if (!keepUserFormat) {
+      if (!keepUserFormat && phone) {
         phone = this.forceFormat(phone, selectedCountry);
       }
       return phone;
@@ -82,12 +82,17 @@ export default Component.extend({
 
   init() {
     this._super(...arguments);
-    let { phone, country } = this.getProperties('phone', 'country');
+    let { phone = '', country } = this.getProperties('phone', 'country');
+    let formattedAsYouType = '';
 
-    let formattedAsYouType = this.formatFromValueAction(phone);
+    if (!phone && !country) {
+      // if no phone neither country set some default one, e.g. Germany
+      // otherwise we have no idea what to show to the user
+      this.set('selectedCountryObj', findCountryObjectByIsoCode('DE'));
+    }
 
-    if (country) {
-      this.set('selectedCountryObj', findCountryObjectByIsoCode(country));
+    if (phone) {
+      formattedAsYouType = this.formatFromValueAction(phone);
     }
 
     this.parseOnInit(this.prepareForOutput(formattedAsYouType, this.get('selectedCountryObj')));
