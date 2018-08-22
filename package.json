@@ -1,6 +1,6 @@
 {
   "name": "ember-intl-phone-input",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Ember.js international phone input",
   "keywords": [
     "ember-addon",
