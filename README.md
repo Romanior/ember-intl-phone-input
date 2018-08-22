@@ -1,11 +1,12 @@
-#  (WIP) Ember International Phone Input
+# Ember International Phone Input
+
+[[ DEMO ]](https://ember-twiddle.com/c38e181747aa387fb4cdfd4c9ad36315?openFiles=twiddle.json%2C)
 
 Leverage `libphonenumber-js` for displaying, formatting and parsing international phone input.
 
 ## Installation
 
 `ember install ember-intl-phone-input`
-
 
  ![in action](https://cl.ly/2x2c272K3y3M/Screen%20Recording%202018-04-24%20at%2012.34%20PM.gif)
 
