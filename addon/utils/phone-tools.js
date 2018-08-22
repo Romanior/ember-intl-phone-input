@@ -1,6 +1,6 @@
 import { assert } from '@ember/debug';
-import metadata from 'libphonenumber-js/metadata.full.json';
-import { getCountryCallingCode } from 'libphonenumber-js';
+import metadata from 'npm:libphonenumber-js/metadata.full.json';
+import libphonenumber from 'npm:libphonenumber-js';
 
 import LOCAL_CODES from '../utils/localcodes';
 import COUNTRIES from '../utils/countries';
@@ -9,7 +9,7 @@ import sanitizePhone from './raw-value';
 const { countries: METADATA_COUNTRIES, country_calling_codes: CALLING_CODES } = metadata;
 const { keys } = Object;
 const OPTIONS = createOptions(COUNTRIES, METADATA_COUNTRIES, LOCAL_CODES);
-
+const { getCountryCallingCode } = libphonenumber;
 
 export const COUNTRY_OPTIONS = OPTIONS.COUNTRY_OPTIONS;
 

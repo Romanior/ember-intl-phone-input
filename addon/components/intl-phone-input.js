@@ -1,14 +1,15 @@
 import Component from '@ember/component';
 import { computed } from '@ember/object';
 import { alias } from '@ember/object/computed';
-import { parseNumber, formatNumber, AsYouType, isValidNumber } from 'libphonenumber-js';
-import EXAMPLES from 'libphonenumber-js/examples.mobile.json';
+import libphonenumber from 'npm:libphonenumber-js';
+import EXAMPLES from 'npm:libphonenumber-js/examples.mobile.json';
 
 import layout from '../templates/components/intl-phone-input';
 import FORMATS from '../utils/formats';
 import { searchProbableCountry, findCountryObjectByIsoCode, COUNTRY_OPTIONS } from '../utils/phone-tools';
 import sanitizePhone from '../utils/raw-value';
 
+const { parseNumber, formatNumber, AsYouType, isValidNumber } = libphonenumber;
 const { assign } = Object;
 
 export default Component.extend({
