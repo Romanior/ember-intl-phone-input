@@ -64,6 +64,16 @@ export default Component.extend({
     }
   }),
 
+  selectedCountryObj: computed('country', {
+    get() {
+      let country = this.get('country').toUpperCase();
+      return findCountryObjectByIsoCode(country);
+    },
+    set(k, v) {
+      return v
+    }
+  }),
+
   placeholder: computed('format', 'showExampleAsPlaceholder', 'selectedCountryObj.country', function() {
     let { showExampleAsPlaceholder, format, selectedCountryObj } =
       this.getProperties('showExampleAsPlaceholder', 'format', 'selectedCountryObj');
@@ -177,17 +187,17 @@ export default Component.extend({
       this.keyUpInput(this.prepareForOutput(formattedAsYouType, this.get('selectedCountryObj')), event);
     },
 
-    valueChanged(value, event) {
+    valueChanged(value) {
       let formattedAsYouType = this.formatFromValueAction(value);
-      this.valueChanged(this.prepareForOutput(formattedAsYouType, this.get('selectedCountryObj')), event);
+      this.valueChanged(this.prepareForOutput(formattedAsYouType, this.get('selectedCountryObj')));
     },
 
-    onFocusInput(value, event) {
-      this.onFocusInput(this.prepareForOutput(value, this.get('selectedCountryObj')), event);
+    onFocusInput(value) {
+      return value && this.onFocusInput(this.prepareForOutput(value, this.get('selectedCountryObj')));
     },
 
-    onBlurInput(value, event) {
-      this.onBlurInput(this.prepareForOutput(value, this.get('selectedCountryObj')), event);
+    onBlurInput(value) {
+      return value && this.onBlurInput(this.prepareForOutput(value, this.get('selectedCountryObj')));
     }
   }
 
