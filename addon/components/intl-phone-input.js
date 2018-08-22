@@ -66,8 +66,10 @@ export default Component.extend({
 
   selectedCountryObj: computed('country', {
     get() {
-      let country = this.get('country').toUpperCase();
-      return findCountryObjectByIsoCode(country);
+      let country = this.get('country');
+      if (country) {
+        return findCountryObjectByIsoCode(country.toUpperCase());
+      }
     },
     set(k, v) {
       return v
