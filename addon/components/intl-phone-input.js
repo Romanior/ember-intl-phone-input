@@ -1,37 +1,36 @@
 import Component from '@ember/component';
-import { get, computed } from '@ember/object';
-import libphonenumber from 'libphonenumber-js';
-import metadata from 'libphonenumber-js/metadata.full.json';
-import examples from 'libphonenumber-js/examples.mobile.json';
+import { computed } from '@ember/object';
+import { alias } from '@ember/object/computed';
+import { parseNumber, formatNumber, AsYouType, isValidNumber } from 'libphonenumber-js';
+import EXAMPLES from 'libphonenumber-js/examples.mobile.json';
 
 import layout from '../templates/components/intl-phone-input';
-import countries from '../utils/countries';
 import FORMATS from '../utils/formats';
-import LOCAL_CODES from '../utils/localcodes';
-import rawValue from '../utils/raw-value';
-import performSearchCountry from '../utils/perform-search-country';
+import { searchProbableCountry, findCountryObjectByIsoCode, COUNTRY_OPTIONS } from '../utils/phone-tools';
+import sanitizePhone from '../utils/raw-value';
 
-const { countries: METADATA_COUNTRIES, country_calling_codes: CALLING_CODES } = metadata;
-const { parseNumber, formatNumber, AsYouType, isValidNumber } = libphonenumber;
-const { keys, assign } = Object;
+const { assign } = Object;
 
 export default Component.extend({
   autocomplete: 'off',
   inputClassName: 'ember-intl-phone-input__input',
   classNames: ['ember-intl-phone-input'],
   hasDropDown: true,
-  country: 'RU',
-  countries,
+  phone: null,
+  country: null,
+
   layout,
   showExampleAsPlaceholder: true,
 
   format: FORMATS.INTERNATIONAL,
+  countryOptions: COUNTRY_OPTIONS,
+
   shouldFormatAsYouType: true,
-  shouldFormatOnChange: true,
   keepUserFormat: false,
 
   disabled: false,
   readonly: false,
+
   inputType: 'text',
   inputComponent: 'intl-phone-input/input',
 
@@ -41,13 +40,20 @@ export default Component.extend({
   // actions
   keyUpInput() {},
   valueChanged() {},
+  parseOnInit() {},
+  onFocusInput() {},
+  onBlurInput() {},
 
-  value: computed('phone', {
+  value: alias('phone'),
+  countryCode: alias('country'),
+
+  formattedValue: computed('phone', {
     get() {
-      let selectedCountry = this.get('selected.country');
+      let selectedCountry = this.get('selectedCountryObj.country');
       let phone = this.get('phone');
       let keepUserFormat = this.get('keepUserFormat');
-      if (!keepUserFormat) {
+
+      if (!keepUserFormat && phone) {
         phone = this.forceFormat(phone, selectedCountry);
       }
       return phone;
@@ -57,180 +63,130 @@ export default Component.extend({
     }
   }),
 
-  selected: computed('country', {
-    get() {
-      let country = this.get('country');
-      if (country) {
-        country = String(country).toUpperCase();
-        return this.findOptionByIsoCode(country);
-      }
-    },
-    set(k, v) {
-      return v
-    }
-  }),
-
-  placeholder: computed('country', 'format', 'showExampleAsPlaceholder', 'selected.country', function() {
-    let { showExampleAsPlaceholder, country, format, selected } =
-      this.getProperties('showExampleAsPlaceholder', 'country', 'format', 'selected');
+  placeholder: computed('format', 'showExampleAsPlaceholder', 'selectedCountryObj.country', function() {
+    let { showExampleAsPlaceholder, format, selectedCountryObj } =
+      this.getProperties('showExampleAsPlaceholder', 'format', 'selectedCountryObj');
 
     if (showExampleAsPlaceholder) {
-      country = get(selected, 'country') || country;
-      return formatNumber({ country, phone: examples[country] }, format)
+      let country = selectedCountryObj.country;
+      return formatNumber({ country, phone: EXAMPLES[country] }, format)
     }
   }),
 
-  asYouType: computed('country', 'selected.country', function() {
-    let country = this.get('selected.country') || this.get('country');
+  asYouType: computed('country', 'selectedCountryObj.country', function() {
+    let country = this.get('selectedCountryObj.country') || this.get('country');
     return new AsYouType(country);
   }),
 
   init() {
     this._super(...arguments);
-    this.setProperties(this.createCountryAndMetaLocalOptions(this.get('countries'), METADATA_COUNTRIES, LOCAL_CODES));
-  },
+    let { phone = '', country } = this.getProperties('phone', 'country');
+    let formattedAsYouType = '';
 
-  createCountryAndMetaLocalOptions(countries, metadata, localCodes) {
-    let countryKeys = keys(countries);
-    let countryOptions = [];
-    let metaLocalCodes = {};
-
-    for (let i = 0; i <= countryKeys.length; i++) {
-      let country = countryKeys[i];
-      let name = countries[country];
-      let metadataCountry = metadata[country];
-
-      if (metadataCountry) {
-        let localCode = metadataCountry[9];
-        let callingCode = metadataCountry[0];
-
-        countryOptions.push({
-          name, country, countryLowerCase: country.toLowerCase(), callingCode, localCode
-        });
-
-        if (localCode) {
-          metaLocalCodes[country] = localCode;
-        }
-
-        if (localCodes[country]) {
-          metaLocalCodes[country] = localCodes[country];
-        }
-      }
-
+    if (!phone && !country) {
+      // if no phone neither country set some default one, e.g. Germany
+      // otherwise we have no idea what to show to the user
+      this.set('selectedCountryObj', findCountryObjectByIsoCode('DE'));
     }
-    return { countryOptions, metaLocalCodes };
+
+    if (phone) {
+      formattedAsYouType = this.formatFromValueAction(phone);
+    }
+
+    this.parseOnInit(this.prepareForOutput(formattedAsYouType, this.get('selectedCountryObj')));
   },
 
-  matcher(option = '', term = '') {
-    option = String(get(option, 'name')).toLowerCase();
-    term = String(term).toLowerCase();
-
-    return option.startsWith(term) ? 1 : -1;
-  },
-
-  formatAsYouType(value, shouldFormat) {
-    let formatted = value;
+  formatAsYouType(formattedValue, shouldFormat) {
+    let formatted = formattedValue;
     if (shouldFormat) {
       let asYouType = this.get('asYouType');
       asYouType.reset();
-      formatted = asYouType.input(value);
+      formatted = asYouType.input(formattedValue);
     }
     return formatted;
   },
 
-  forceFormat(value, selectedCountry) {
-    if (value) {
-      let formatted;
-      let format = this.get('format');
-      let parsed = parseNumber(value, selectedCountry);
+  forceFormat(strToFormat, selectedCountry, format = this.get('format')) {
+    let formatted;
+    let parsed = parseNumber(strToFormat, selectedCountry);
 
-      if (parsed.phone) {
-        formatted = formatNumber(parsed, format)
-      } else {
-        formatted = formatNumber({ phone: value, country: selectedCountry }, format)
-      }
-      return formatted;
+    if (parsed.phone) {
+      formatted = formatNumber(parsed, format)
+    } else {
+      formatted = formatNumber({ phone: strToFormat, country: selectedCountry }, format)
     }
+    return formatted;
   },
 
-  prepareForOutput(value, selected) {
-    // try to parse value as correct number
-    let parsed = parseNumber(value, selected.country);
+  prepareForOutput(formattedValue, selectedCountryObj) {
+    // try to parse formattedValue as correct number
+    let parsed = parseNumber(formattedValue, selectedCountryObj.country);
 
     // if it does not work, just stripped out +, \s and -
     if (!parsed.phone) {
-      parsed.phone = rawValue(value).replace(selected.callingCode, '');
+      parsed.phone = sanitizePhone(formattedValue).replace(selectedCountryObj.callingCode, '');
     }
 
     return assign({
-      number: formatNumber(parsed.phone, selected.country, FORMATS.E164),
-      probablyValidNumber: isValidNumber(value, selected.country)
-    }, parsed, selected);
+      number: formatNumber(parsed.phone, selectedCountryObj.country, FORMATS.E164),
+      probablyValidNumber: isValidNumber(formattedValue, selectedCountryObj.country)
+    }, parsed, selectedCountryObj);
   },
 
-  searchCountryBasedOnValue(value, selectedCountry) {
-    let hasPlusChar = new RegExp(/\+/).test(value);
-    if (hasPlusChar) {
-      let countryOptions = this.get('countryOptions');
-      let metaLocalCodes = this.get('metaLocalCodes');
-      let guessedCountries = this.get('guessedCountries');
-      let { probCountry, probCountries } =
-        performSearchCountry(value, selectedCountry, countryOptions, guessedCountries, metaLocalCodes, CALLING_CODES);
-
-      this.set('guessedCountries', probCountries);
-      return probCountry;
-    }
+  searchCountryBasedOnValue(phoneToSearch) {
+    return searchProbableCountry(phoneToSearch, this.get('selectedCountryObj.country'));
   },
 
-  findOptionByIsoCode(country) {
-    let countryOptions = this.get('countryOptions');
-    if (countryOptions) {
-      return countryOptions.find(c => c.country === country);
+  formatFromValueAction(value) {
+    let country = this.searchCountryBasedOnValue(value);
+    let formattedAsYouType = this.formatAsYouType(value, this.get('shouldFormatAsYouType'));
+
+    if (country) {
+      this.set('selectedCountryObj', findCountryObjectByIsoCode(country));
     }
+
+    this.set('formattedValue', formattedAsYouType);
+    return formattedAsYouType;
   },
 
   actions: {
-    countryChanged(selected) {
-      let previousCallingCode = this.get('selected.callingCode');
-      let value = this.get('value');
+    countryChanged(selectedCountryObj) {
 
-      if (value) {
+      let previousCallingCode = this.get('selectedCountryObj.callingCode');
+      let formattedValue = this.get('formattedValue');
+
+      if (formattedValue) {
         // swap calling codes on input
-        value = this.forceFormat(value.replace(previousCallingCode, selected.callingCode), selected);
+        formattedValue = this.forceFormat(
+          formattedValue.replace(previousCallingCode, selectedCountryObj.callingCode),
+          selectedCountryObj
+        );
       } else {
-        value = `+${selected.callingCode} `
+        formattedValue = `+${selectedCountryObj.callingCode} `
       }
 
-      this.set('guessedCountries', null);
-      this.set('value', value);
-      this.set('selected', selected);
+      this.set('formattedValue', formattedValue);
+      this.set('selectedCountryObj', selectedCountryObj);
 
-      this.valueChanged(this.prepareForOutput(value, selected));
+      this.valueChanged(this.prepareForOutput(formattedValue, selectedCountryObj));
     },
 
     keyUpInput(value, event) {
-      let formattedValue = this.formatAsYouType(value, this.get('shouldFormatAsYouType'));
-      let country = this.searchCountryBasedOnValue(formattedValue, this.get('selected.country'));
-
-      if (country) {
-        this.set('selected', this.findOptionByIsoCode(country));
-      }
-
-      this.keyUpInput(this.prepareForOutput(formattedValue, this.get('selected')), event);
-      this.set('value', formattedValue);
+      let formattedAsYouType = this.formatFromValueAction(value);
+      this.keyUpInput(this.prepareForOutput(formattedAsYouType, this.get('selectedCountryObj')), event);
     },
 
-    valueChanged(value) {
-      let formattedValue = this.formatAsYouType(value, this.get('shouldFormatOnChange'));
-      let selected = this.get('selected');
+    valueChanged(value, event) {
+      let formattedAsYouType = this.formatFromValueAction(value);
+      this.valueChanged(this.prepareForOutput(formattedAsYouType, this.get('selectedCountryObj')), event);
+    },
 
-      if (!this.get('keepUserFormat') && value) {
-        formattedValue = this.forceFormat(formattedValue, this.get('selected.country'));
-      }
+    onFocusInput(value, event) {
+      this.onFocusInput(this.prepareForOutput(value, this.get('selectedCountryObj')), event);
+    },
 
-      this.valueChanged(this.prepareForOutput(formattedValue, selected));
-
-      this.set('value', formattedValue);
+    onBlurInput(value, event) {
+      this.onBlurInput(this.prepareForOutput(value, this.get('selectedCountryObj')), event);
     }
   }
 
