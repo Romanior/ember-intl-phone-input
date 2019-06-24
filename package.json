@@ -34,7 +34,7 @@
     "ember-cli-babel": "^6.16.0",
     "ember-cli-htmlbars": "^3.0.0",
     "ember-power-select": "^2.0.4",
-    "libphonenumber-js": "1.4.5"
+    "libphonenumber-js": "1.7.20"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.5",

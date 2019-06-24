@@ -4654,12 +4654,11 @@ levn@^0.3.0, levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-libphonenumber-js@1.4.5:
-  version "1.4.5"
-  resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.4.5.tgz#956b9a9d927a36d83b2d708e57f1330ce5f42e4e"
+libphonenumber-js@1.7.20:
+  version "1.7.20"
+  resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.7.20.tgz#2050a7df68f0ff0255f9f41ec0b9263f370eb58f"
   dependencies:
     minimist "^1.2.0"
-    semver-compare "^1.0.0"
     xml2js "^0.4.17"
 
 linkify-it@^2.0.0:
@@ -6479,10 +6478,6 @@ sane@^2.2.0, sane@^2.4.1:
 sax@>=0.6.0:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
-
-semver-compare@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/semver-compare/-/semver-compare-1.0.0.tgz#0dee216a1c941ab37e9efb1788f6afc5ff5537fc"
 
 "semver@2 || 3 || 4 || 5", semver@^5.1.1, semver@^5.4.1, semver@^5.5.0:
   version "5.5.0"
